@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Torrent
+Exec=aria2
+NoDisplay=true
+Terminal=true
+StartupWMClass=torrnet

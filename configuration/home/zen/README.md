@@ -1,0 +1,2 @@
+- uBlock Origin
+- pyfoxwal

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Terminal
+Exec=wezterm
+NoDisplay=true
+Terminal=false
+StartupWMClass=terminal
