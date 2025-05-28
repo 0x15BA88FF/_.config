@@ -1,20 +1,3 @@
-[config.wallpaper]
-command = "feh"
-arguments = [ "--bg-fill" ]
-
-# [config.wallpaper]
-# command = "swww"
-# arguments = [
-#     "img",
-#     "--resize", "crop",
-#     "--filter", "Lanczos3",
-#     "--fill-color", "000000",
-#     "--transition-fps", "60",
-#     "--transition-duration", "3",
-#     "--transition-type", "random",
-#     "--transition-bezier", "0.4,0.2,0.4,1.0"
-# ]
-
 [config.custom_colors]
 red = "#f38ba8"
 green = "#a6e3a1"
