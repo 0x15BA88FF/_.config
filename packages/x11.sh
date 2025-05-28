@@ -5,6 +5,7 @@ set -euo pipefail
 # --- Package list
 
 PACKAGES=(
+    "dex"
     "feh"
     "xsel"
     "xcolor"
