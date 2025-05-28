@@ -8,8 +8,8 @@ exec --no-startup-id polybar &
 exec --no-startup-id clipmenud &
 exec --no-startup-id nm-applet &
 exec --no-startup-id blueman-applet &
-exec --no-startup-id $HOME/.local/bin/wallpaper play &
 exec --no-startup-id dex --autostart --environment i3 &
+exec --no-startup-id $HOME/.local/bin/wallpaper.sh play &
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork &
 
 # --- Keybinds
@@ -29,10 +29,9 @@ set $file-manager gtk-launch file-manager
 set $system-monitor gtk-launch system-monitor
 
 bindsym $super+q kill
-bindsym $super+Delete exit
+bindsym $super+Delete exec i3-msg exit
 bindsym $super+Shift+c reload
 bindsym $super+Shift+r restart
-bindsym $super+Shift+e exec i3-msg exit
 bindsym $super+Escape exec loginctl lock-session
 
 bindsym $super+Control+c move position center
