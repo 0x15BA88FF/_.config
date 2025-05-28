@@ -19,6 +19,7 @@ PACKAGES=(
     "eza"
     "bat"
     "zsh"
+    "vhs"
     "tree"
     "curl"
     "btop"
