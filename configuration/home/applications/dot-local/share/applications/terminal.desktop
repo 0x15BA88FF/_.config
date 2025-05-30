@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Terminal
-Exec=wezterm
+Exec=ghostty
 NoDisplay=true
 Terminal=false
 StartupWMClass=terminal

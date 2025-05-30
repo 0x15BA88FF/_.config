@@ -2,15 +2,9 @@
 
 set -euo pipefail
 
-# --- Install packages with script
-
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
-
 # --- Package list
 
 PACKAGES=(
-    "xh"
     "jq"
     "fd"
     "ufw"
@@ -51,13 +45,12 @@ PACKAGES=(
     "sddm"
     "rofi"
     "loupe"
-    "wezterm"
+    "ghostty"
     "obsidian"
     "chromium"
     "rofimoji"
     "nautilus"
     "plymouth"
-    "flameshot"
     "matugen-bin"
     "polkit-gnome"
     "gnome-clocks"
@@ -81,14 +74,18 @@ PACKAGES=(
     "yt-dlp"
     "network-manager-applet"
 
+    "rsync"
     "zathura"
     "tesseract"
     "zathura-cb"
     "zaread-git"
     "zathura-pdf-mupdf"
     "tesseract-data-eng"
-
-    "rsync"
 )
 
 paru -S --noconfirm "${PACKAGES[@]}"
+
+# --- Install packages with script
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh

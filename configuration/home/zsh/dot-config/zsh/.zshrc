@@ -12,7 +12,7 @@ _source "$XDG_CONFIG_HOME/shell/functions"
 _source "$XDG_DATA_HOME/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ||
     git clone https://github.com/zsh-users/zsh-autosuggestions.git "$XDG_DATA_HOME/zsh/zsh-autosuggestions/"
 _source "$XDG_DATA_HOME/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ||
-    git clone https://github.com/zsh-users/zsh-autosuggestions.git "$XDG_DATA_HOME/zsh/zsh-syntax-highlighting/"
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$XDG_DATA_HOME/zsh/zsh-syntax-highlighting/"
 
 _exists fzf && eval "$(fzf --zsh)"
 _exists atuin && eval "$(atuin init zsh)"

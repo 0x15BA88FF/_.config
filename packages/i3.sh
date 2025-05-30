@@ -10,5 +10,5 @@ PACKAGES=(
     "i3-lock"
 )
 
-install_packages "x11"
+sh ./protocols.sh "wayland"
 paru -S --noconfirm "${PACKAGES[@]}"

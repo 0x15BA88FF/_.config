@@ -13,7 +13,10 @@ PACKAGES=(
     "yazi"
     "direnv"
     "picard"
+    "pitivi"
+    "discord"
     "newsboat"
+    "httpie-desktop-bin"
 )
 
 paru -S --noconfirm "${PACKAGES[@]}"

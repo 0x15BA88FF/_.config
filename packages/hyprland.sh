@@ -14,5 +14,5 @@ PACKAGES=(
     "xdg-desktop-portal-hyprland"
 )
 
-install_packages "waybar"
+sh ./protocols.sh "wayland"
 paru -S --noconfirm "${PACKAGES[@]}"

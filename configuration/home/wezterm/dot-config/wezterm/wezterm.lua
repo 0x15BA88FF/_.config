@@ -11,6 +11,6 @@ config.color_schemes = { ["matugen"] = require("matugen") }
 config.color_scheme = "matugen"
 
 config.enable_tab_bar = false
-config.front_end = "Software"
+config.front_end = "WebGpu"
 
 return config
