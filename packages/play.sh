@@ -10,13 +10,10 @@ curl -L https://coder.com/install.sh | sh
 # --- Package list
 
 PACKAGES=(
-    "yazi"
+    "vhs"
     "direnv"
     "picard"
-    "pitivi"
     "discord"
-    "newsboat"
-    "httpie-desktop-bin"
 )
 
 paru -S --noconfirm "${PACKAGES[@]}"

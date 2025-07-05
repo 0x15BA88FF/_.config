@@ -1,8 +1,0 @@
-{
-    "group/drawer": {
-        "orientation": "horizontal",
-        "modules": [
-            "wlr/taskbar"
-        ]
-    }
-}

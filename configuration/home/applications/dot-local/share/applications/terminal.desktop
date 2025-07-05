@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Terminal
-Exec=ghostty
+Exec=alacritty
 NoDisplay=true
 Terminal=false
 StartupWMClass=terminal

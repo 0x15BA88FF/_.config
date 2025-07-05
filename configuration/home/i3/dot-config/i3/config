@@ -1,16 +1,17 @@
-# --- Environment Variables
-
-exec export LIBGL_ALWAYS_SOFTWARE=true
-
 # --- Startups
 
-exec --no-startup-id polybar &
 exec --no-startup-id clipmenud &
 exec --no-startup-id nm-applet &
 exec --no-startup-id blueman-applet &
-exec --no-startup-id dex --autostart --environment i3 &
 exec --no-startup-id $HOME/.local/bin/wallpaper.sh play &
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork &
+
+# --- Appearance
+
+gaps inner 8
+gaps outer 0
+
+for_window [class="^.*"] border pixel 0
 
 # --- Keybinds
 
@@ -20,18 +21,15 @@ set $submod Mod1
 floating_modifier $super
 tiling_drag modifier titlebar
 
-set $note gtk-launch notes
 set $browser gtk-launch browser
 set $terminal gtk-launch terminal
-set $calculator gtk-launch calculator
 set $text-editor gtk-launch text-editor
 set $file-manager gtk-launch file-manager
-set $system-monitor gtk-launch system-monitor
 
 bindsym $super+q kill
-bindsym $super+Delete exec i3-msg exit
 bindsym $super+Shift+c reload
 bindsym $super+Shift+r restart
+bindsym $super+Delete exec i3-msg exit
 bindsym $super+Escape exec loginctl lock-session
 
 bindsym $super+Control+c move position center
@@ -44,13 +42,10 @@ bindsym $super+Control+Return fullscreen toggle
 bindsym Control+Escape exec killall polybar || polybar
 bindsym $super+space exec pkill -x rofi || rofi -show drun
 
-bindsym $super+Shift+Escape exec $system-monitor
-bindsym $super+equal exec $calculator
 bindsym $super+Return exec $terminal
 bindsym $super+e exec $file-manager
 bindsym $super+w exec $text-editor
 bindsym $super+b exec $browser
-bindsym $super+o exec $note
 
 bindsym XF86AudioStop exec playerctl stop
 bindsym XF86AudioPlay exec playerctl play
@@ -123,10 +118,3 @@ bindsym $super+Control+Shift+h resize shrink width 10 px or 10 ppt
 bindsym $super+Control+Shift+j resize grow height 10 px or 10 ppt
 bindsym $super+Control+Shift+k resize shrink height 10 px or 10 ppt
 bindsym $super+Control+Shift+l resize grow width 10 px or 10 ppt
-
-# --- Appearance
-
-gaps inner 8
-gaps outer 0
-
-for_window [class="^.*"] border pixel 0

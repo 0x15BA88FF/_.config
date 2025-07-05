@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Text Editor
-Exec=gnome-text-editor
-Terminal=false
+Exec=nvim
+Terminal=true
 NoDisplay=true
 StartupWMClass=textedit

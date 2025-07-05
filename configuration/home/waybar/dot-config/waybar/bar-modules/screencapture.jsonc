@@ -1,8 +1,0 @@
-{
-    "custom/screencapture": {
-        "format": "",
-        "tooltip-format": "  Screen capture",
-        "on-click": "$HOME/.local/bin/screencapture menu",
-        "interval": "once",
-    },
-}

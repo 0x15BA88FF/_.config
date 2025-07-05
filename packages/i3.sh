@@ -1,6 +1,5 @@
 #!/usr/bin/bash
 
-source ./dps.sh
 set -euo pipefail
 
 # --- Package list
@@ -10,5 +9,5 @@ PACKAGES=(
     "i3-lock"
 )
 
-sh ./protocols.sh "wayland"
+sh ./protocols.sh "x11"
 paru -S --noconfirm "${PACKAGES[@]}"

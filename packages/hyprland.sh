@@ -1,6 +1,5 @@
 #!/usr/bin/bash
 
-source ./dps.sh
 set -euo pipefail
 
 # --- Package list

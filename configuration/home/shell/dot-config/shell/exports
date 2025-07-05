@@ -7,8 +7,6 @@ export NODE_REPL_MODE="sloppy"
 export PYTHONIOENCODING="UTF-8"
 export BASH_SILENCE_DEPRECATION_WARNING=1
 
-export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-export BASHDOTDIR="$XDG_CONFIG_HOME/bash"
 export ZSH_CACHE_DIR="$XDG_CACHE_HOME/zsh"
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
 export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"

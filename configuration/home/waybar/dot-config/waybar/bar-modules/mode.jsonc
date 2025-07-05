@@ -1,8 +1,0 @@
-{
-    "custom/mode": {
-        "format": "󰟡",
-        "tooltip-format": "󰟡 switch mode",
-        "on-click": "$HOME/.local/bin/mode menu",
-        "interval": "once",
-    },
-}

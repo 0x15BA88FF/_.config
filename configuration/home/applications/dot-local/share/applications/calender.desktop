@@ -1,7 +1,0 @@
-[Desktop Entry]
-Name=Calendar
-Type=Application
-Exec=gnome-calendar
-Terminal=false
-NoDisplay=true
-StartupWMClass=calendar

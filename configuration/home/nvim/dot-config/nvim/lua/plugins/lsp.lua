@@ -1,4 +1,5 @@
 return {
+    -- LSP Configuration
     {
         "neovim/nvim-lspconfig",
         dependencies = {
@@ -11,18 +12,20 @@ return {
                         { path = "${3rd}/luv/library", words = { "vim%.uv" } },
                     },
                 },
-            }
+            },
         },
         config = function()
             local lspconfig = require("lspconfig")
             local util = require("lspconfig.util")
             local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-            lspconfig.lua_ls.setup {
+            -- Lua LSP
+            lspconfig.lua_ls.setup({
                 capabilities = capabilities,
-            }
+            })
 
-            lspconfig.pyright.setup {
+            -- Python LSP
+            lspconfig.pyright.setup({
                 capabilities = capabilities,
                 root_dir = util.root_pattern("pyproject.toml", "requirements.txt", ".git"),
                 before_init = function(_, config)
@@ -33,25 +36,11 @@ return {
                         config.settings.python.pythonPath = venv .. "/bin/python"
                     end
                 end,
-            }
-            vim.api.nvim_create_autocmd("LspAttach", {
-                callback = function(args)
-                    local client = vim.lsp.get_client_by_id(args.data.client_id)
-                    if not client then return end
-
-                    if client.supports_method("textDocument/formatting") then
-                        vim.api.nvim_create_autocmd("BufWritePre", {
-                            buffer = args.buf,
-                            callback = function()
-                                vim.lsp.buf.format({ bufrn = args.buf, id = client.id })
-                            end
-                        })
-                    end
-                end
             })
-        end
+        end,
     },
 
+    -- Mason LSP Installer
     {
         "williamboman/mason.nvim",
         build = ":MasonUpdate",
@@ -61,9 +50,42 @@ return {
     {
         "williamboman/mason-lspconfig.nvim",
         config = function()
-            require("mason-lspconfig").setup {
-                ensure_installed = { "pyright" },
-            }
+            require("mason-lspconfig").setup({
+                ensure_installed = { "pyright", "lua_ls" },
+            })
         end,
+    },
+
+    -- Install tools like black, stylua via Mason
+    {
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        lazy = false,
+        config = function()
+            require("mason-tool-installer").setup({
+                ensure_installed = {
+                    "black",    -- Python formatter
+                    "prettier", -- JS/TS formatter
+                },
+            })
+        end,
+    },
+
+    -- Conform (code formatter)
+    {
+        "stevearc/conform.nvim",
+        event = "BufWritePre",
+        opts = {
+            formatters_by_ft = {
+                lua = { "stylua" },
+                -- python = { "black" },
+                javascript = { "prettier" },
+                typescript = { "prettier" },
+            },
+            format_on_save = {
+                timeout_ms = 500,
+                lsp_format = "fallback",
+            },
+            notify_on_error = true,
+        },
     },
 }

@@ -1,7 +1,0 @@
-[Desktop Entry]
-Name=Clock
-Type=Application
-Exec=gnome-clocks
-Terminal=false
-NoDisplay=true
-StartupWMClass=clock

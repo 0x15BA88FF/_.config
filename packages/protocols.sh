@@ -21,7 +21,7 @@ WAYLAND_PACKAGES=(
     "xdg-desktop-portal-wlr"
 )
 
-X_PACKAGES=(
+X11_PACKAGES=(
     "feh"
     "xsel"
     "xcolor"

@@ -1,8 +1,17 @@
 [Unit]
-Description=aria2 Daemon
+Description=Aria2 Daemon
+After=network.target
 
 [Service]
-ExecStart=/usr/bin/aria2c --conf-path=$HOME/.config/aria2/aria2.conf
+Type=simple
+ExecStart=/usr/bin/aria2c --conf-path=%h/.config/aria2/aria2.conf
+Restart=on-failure
+RestartSec=5
+Nice=10
+
+ProtectHome=yes
+ProtectSystem=full
+NoNewPrivileges=true
 
 [Install]
 WantedBy=default.target

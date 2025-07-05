@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Web Browser
-Exec=zen-browser
+Exec=qutebrowser
 NoDisplay=true
 Terminal=false
 StartupWMClass=browser

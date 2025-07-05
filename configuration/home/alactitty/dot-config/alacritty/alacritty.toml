@@ -1,0 +1,16 @@
+[general]
+import = [ "themes/matugen.toml" ]
+live_config_reload = true
+
+[font]
+size = 8
+normal = { family = "JetBrainsMono Nerd Font", style = "Bold" }
+bold = { family = "JetBrainsMono Nerd Font", style = "ExtraBold" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
+bold_italic = { family = "JetBrainsMono Nerd Font", style = "ExtraBold Italic" }
+
+[env]
+TERM = "xterm-256color"
+
+[window]
+decorations = "buttonless"
