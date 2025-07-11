@@ -8,6 +8,8 @@ config_version: 2
 settings:
   statusbar.show:
     global: always
+  tabs.background:
+    global: true
   tabs.position:
     global: top
   tabs.show:

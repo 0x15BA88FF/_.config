@@ -7,13 +7,15 @@ WAYLAND_PACKAGES=(
     "grim"
     "slurp"
     "wtype"
-    "cliphist"
+
+    "wl-clipboard"
+    "clipboard"
+
     "wf-recorder"
 
     "waybar"
     "swaync"
     "swappy"
-    "wl-clipboard"
     "qt5-wayland"
     "qt6-wayland"
     "xdg-desktop-portal"
@@ -23,11 +25,13 @@ WAYLAND_PACKAGES=(
 
 X11_PACKAGES=(
     "feh"
-    "xsel"
+
+    "xclip"
+    "clipboard"
+
     "xcolor"
     "xdotool"
     "polybar"
-    "clipmenu"
     "xss-lock"
     "flameshot"
     "screencast"

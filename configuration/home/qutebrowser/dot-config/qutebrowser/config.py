@@ -1,11 +1,9 @@
 c = c
 config = config
 
-# === Load auto config ===
 config.load_autoconfig()
 config.source("colors.py")
 
-# === Core Settings ===
 c.auto_save.session = True
 c.completion.shrink = True
 c.completion.open_categories = [
@@ -16,7 +14,6 @@ c.completion.open_categories = [
     "filesystem"
 ]
 
-# === Tabs ===
 c.tabs.width = "7%"
 c.tabs.position = "top"
 c.tabs.show = "multiple"
@@ -28,11 +25,10 @@ c.tabs.padding = {
     "right": 9
 }
 c.tabs.indicator.width = 0
+c.tabs.background = True
 
-# === Statusbar ===
 c.statusbar.show = "never"
 
-# === Fonts ===
 c.fonts.default_family = ["Noto Sans"]
 c.fonts.default_size = "10pt"
 
@@ -43,7 +39,6 @@ c.fonts.web.family.serif = "Noto Serif"
 c.fonts.web.family.standard = "Noto Sans"
 c.fonts.web.family.sans_serif = "Noto Sans"
 
-# === Search Engines ===
 c.url.searchengines = {
     "DEFAULT": "https://duckduckgo.com/?q={}",
     "!aw": "https://wiki.archlinux.org/?search={}",
@@ -60,14 +55,12 @@ c.url.searchengines = {
     "!pai": "https://www.perplexity.ai/search?q={}",
 }
 
-# === Dark Mode ===
 c.colors.webpage.darkmode.enabled = False
 c.colors.webpage.preferred_color_scheme = "dark"
 c.colors.webpage.darkmode.policy.images = "never"
 c.colors.webpage.darkmode.algorithm = "lightness-cielab"
 config.set("colors.webpage.darkmode.enabled", False, "file://*")
 
-# === Privacy, Security, and Content Settings ===
 c.content.proxy = "socks://localhost:9050/"
 
 config.set("content.webgl", False, "*")
@@ -77,7 +70,6 @@ config.set("content.canvas_reading", False)
 config.set("content.cookies.accept", "all")
 config.set("content.webrtc_ip_handling_policy", "default-public-interface-only")
 
-# === Ad Blocking ===
 c.content.blocking.enabled = True
 c.content.blocking.adblock.lists = [
     "https://github.com/ewpratten/youtube_ad_blocklist/blob/master/blocklist.txt",

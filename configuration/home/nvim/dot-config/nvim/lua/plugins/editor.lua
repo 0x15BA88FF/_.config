@@ -22,7 +22,7 @@ return {
                 delete_to_trash = true,
                 default_file_explorer = false,
                 float = {
-                    max_width = 100,
+                    max_width = 80,
                     max_height = 20,
                     preview_split = "right",
                 }
@@ -61,18 +61,12 @@ return {
             vim.keymap.set("n", "<Leader>fgc", builtin.git_commits, { desc = "Telescope find git commits" })
             vim.keymap.set("n", "<Leader>fgb", builtin.git_branches, { desc = "Telescope find git branches" })
 
-            vim.keymap.set("n", "<Leader>fv", function()
-                local opts = require("telescope.themes").get_ivy({
-                    cwd = vim.fn.stdpath("config")
+            vim.keymap.set("n", "<leader>fT", function()
+                builtin.live_grep({
+                    prompt_title = "Grep tnew files",
+                    search_dirs = { require("tnew.config").options.dir }
                 })
-                builtin.find_files(opts)
-            end, { desc = "Telescope Find files in vim config" })
-            vim.keymap.set("n", "<leader>fp", function()
-                local opts = require("telescope.themes").get_ivy({
-                    cwd = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy")
-                })
-                builtin.find_files(opts)
-            end, { desc = "Telescope find files in plugins directory" })
+            end, { desc = "Telescope grep tnew files" })
         end,
     },
     {

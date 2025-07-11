@@ -13,18 +13,16 @@ _exists exa &&
     alias ls="eza -h --icons=auto --color=auto --group-directories-first -A" ||
     alias ls="ls -h --color=auto --group-directories-first -A"
 
-paclean() { pacman -Rns $(pacman -Qtdq) && sudo pacman -Scc; }
-alias pacmirror="reflector --verbose --latest 5 --age 6 --sort rate --save /etc/pacman.d/mirrorlist"
-
+alias ip="ip -color=auto"
+alias diff="diff --color=auto"
+alias diff="diff --color=auto"
 alias grep="grep --color=auto"
 alias fgrep="fgrep --color=auto"
 alias egrep="egrep --color=auto"
-alias cget="curl -O -L"
-alias diff="diff --color=auto"
-alias ip="ip -color=auto"
-alias diff="diff --color=auto"
 
-alias l="ls -l"
-alias sudo="sudo "
 alias dev="devault"
+alias cget="curl -O -L"
 alias s="tmux-sessionizer.sh"
+
+paclean() { pacman -Rns $(pacman -Qtdq) && sudo pacman -Scc; }
+alias pacmirror="reflector --verbose --latest 5 --age 6 --sort rate --save /etc/pacman.d/mirrorlist"

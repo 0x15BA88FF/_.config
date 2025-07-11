@@ -6,13 +6,6 @@ return {
         }
     },
     {
-        "folke/snacks.nvim",
-        opts = {
-            dashboard = { example = "advanced" },
-            zen = {}
-        }
-    },
-    {
         "folke/noice.nvim",
         event = "VeryLazy",
         opts = {},

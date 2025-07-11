@@ -51,6 +51,8 @@ PACKAGES=(
     "gnome-text-editor"
     "libreoffice-still"
 
+    "clipcat"
+
     "mpv"
     "mpc"
     "mpd-mpris"
@@ -67,8 +69,6 @@ PACKAGES=(
     "rsync"
     "zathura"
     "tesseract"
-    "zathura-cb"
-    "zaread-git"
     "zathura-pdf-mupdf"
     "tesseract-data-eng"
 )

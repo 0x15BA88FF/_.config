@@ -1,0 +1,9 @@
+[[mgr.prepend_keymap]]
+on   = ["c", "y"]
+run  = "shell 'cb clear & cb copy \"$@\"'"
+desc = "Copy into system clipboard"
+
+[[mgr.prepend_keymap]]
+on   = ["c", "x"]
+run  = "shell 'cb clear & cb cut \"$@\"'"
+desc = "Cut into system clipboard"

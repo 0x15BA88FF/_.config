@@ -47,8 +47,6 @@ install_dotfiles() {
         echo "Installing root dotfiles with sudo..."
         sudo bash -c "$(declare -f stow_packages); stow_packages '$ROOT_CONFIG' '/'"
     fi
-
-    xdg-user-dirs-update
 }
 
 main() {

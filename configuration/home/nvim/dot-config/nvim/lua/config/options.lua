@@ -1,6 +1,9 @@
 local g = vim.g
 local opt = vim.opt
 
+g.mapleader = " "
+g.maplocalleader = " "
+
 g.autoformat = true
 g.have_nerd_font = true
 g.snacks_animate = false
