@@ -1,0 +1,41 @@
+{
+    "group/media": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 300,
+            "transition-left-to-right": true
+        },
+        "modules": [
+            "mpris#icon",
+            "custom/space",
+            "mpris"
+        ]
+    },
+    "mpris#icon": {
+        "format": "{player_icon}",
+        "tooltip-format": "{player}: {dynamic}",
+        "player-icons": {
+            "": "▶",
+            "default": "▶",
+            "mpd": "",
+            "mpv": "",
+            "vlc": "󰕼"
+        }
+    },
+    "mpris": {
+        "format": "{status_icon}  {dynamic}",
+        "tooltip-format": "{player}: {dynamic}",
+        "status-icons": {
+            "playing": "",
+            "paused": "",
+            "stopped": ""
+        },
+        "dynamic-importance-order": [
+            "title",
+            "artist"
+        ],
+        "ignored-players": [],
+        "dynamic-len": 25,
+        "max-length": 30
+    }
+}

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+DELAY_MIN=1
+MAX_RINGS=3
+RING_DURATION_MIN=0.1
+SLEEP_BETWEEN_MIN=0.5
+QUEUE_FILE="/tmp/alarm_queue.txt"
+ALARM_SOUND="/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --delay) DELAY_MIN="$2"; shift 2 ;;
+        --ring-duration) RING_DURATION_MIN="$2"; shift 2 ;;
+        --sleep) SLEEP_BETWEEN_MIN="$2"; shift 2 ;;
+        --max-rings) MAX_RINGS="$2"; shift 2 ;;
+        --sound) ALARM_SOUND="$2"; shift 2 ;;
+        *)
+            echo "Unknown argument: $1"
+            echo "Usage: $0 [--delay MIN] [--ring-duration MIN] [--sleep MIN] [--max-rings COUNT] [--sound FILE]"
+            exit 1
+            ;;
+    esac
+done
+
+if [[ ! -f "$ALARM_SOUND" ]]; then
+    echo "Error: Sound file not found: $ALARM_SOUND"
+    exit 1
+fi
+
+DELAY_SEC=$("$DELAY_MIN * 60" | bc)
+RING_DURATION_SEC=$("$RING_DURATION_MIN * 60" | bc)
+SLEEP_BETWEEN_SEC=$("$SLEEP_BETWEEN_MIN * 60" | bc)
+
+touch "$QUEUE_FILE"
+
+echo $$ >> "$QUEUE_FILE"
+sleep "$DELAY_SEC"
+
+get_oldest_pid() {
+    while read -r pid; do
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "$pid"
+            return
+        else
+            sed -i "1d" "$QUEUE_FILE"
+        fi
+    done < "$QUEUE_FILE"
+}
+
+RING_COUNT=0
+
+while [[ "$MAX_RINGS" -eq 0 || "$RING_COUNT" -lt "$MAX_RINGS" ]]; do
+    paplay "$ALARM_SOUND" &
+    SOUND_PID=$!
+    sleep "$RING_DURATION_SEC"
+    kill "$SOUND_PID" 2>/dev/null
+
+    ((RING_COUNT++))
+    [[ "$MAX_RINGS" -eq 0 || "$RING_COUNT" -lt "$MAX_RINGS" ]] && sleep "$SLEEP_BETWEEN_SEC"
+done
+
+sed -i "/^$$$/d" "$QUEUE_FILE"

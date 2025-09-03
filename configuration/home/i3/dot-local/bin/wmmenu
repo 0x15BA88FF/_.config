@@ -1,0 +1,374 @@
+#!/usr/bin/env bash
+
+pkill -x rofi >/dev/null 2>&1 || true
+
+EMOJI_CONFIG="${HOME}/.config/rofi/emoji.rasi"
+MENU_CONFIG="${HOME}/.config/rofi/controls.rasi"
+WALLPAPER_CONFIG="${HOME}/.config/rofi/controls.rasi"
+
+show_rofi_menu() {
+    local rofi_config="$1"; shift
+    local prompt="$1"; shift
+    local options=("$@")
+    local labels=() entry label cmd
+
+    for entry in "${options[@]}"; do
+        IFS=$'\x1F' read -r label cmd <<< "$entry"
+        labels+=("$label")
+    done
+
+    local selected
+
+    selected="$(printf '%s\n' "${labels[@]}" | rofi -config "$rofi_config" -dmenu -p "$prompt")"
+    selected="$(printf '%s' "$selected" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+    [[ -z "$selected" ]] && return 1
+
+    for i in "${!labels[@]}"; do
+        if [[ "${labels[$i]}" == "$selected" ]]; then
+            printf '%s' "${options[$i]}"
+            return 0
+        fi
+    done
+
+    return 2
+}
+
+run_in_background() {
+    local cmd="$1"
+
+    sleep 0.12
+    nohup bash -c "$cmd" >/dev/null 2>&1 &
+    disown >/dev/null 2>&1 || true
+}
+
+# ---------------- menus ----------------
+
+clipboard_menu() {
+    run_in_background "clipcat-menu"
+}
+
+clipboard_menu_advance() {
+    local options=(
+        $'Copy\x1Fclipcat-menu'
+        $'Remove\x1Fclipcat-menu remove'
+        $'Edit\x1Fclipcat-menu edit'
+        $'Insert\x1Fclipcat-menu insert'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Clipboard:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+screenshot_menu() {
+    local options=(
+        $'Screenshot Screen\x1Fscreencapture screenshot screen'
+        $'Screenshot Window\x1Fscreencapture screenshot window'
+        $'Screenshot Region\x1Fscreencapture screenshot region'
+        $'Advanced Options\x1Fwmmenu capture screenshot advance'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Screenshot:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+screenshot_menu_advance() {
+    local mode_options=(
+        $'Screen\x1Fscreen'
+        $'Window\x1Fwindow'
+        $'Region\x1Fregion'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Screenshot area:" "${mode_options[@]}")"; then
+        return 1
+    fi
+
+    IFS=$'\x1F' read -r label mode <<< "$sel"
+
+    local freeze_options=(
+        $'Freeze\x1F--freeze'
+        $'No Freeze\x1F--no-freeze'
+    )
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Freeze:" "${freeze_options[@]}")"; then
+        return 1
+    fi
+
+    IFS=$'\x1F' read -r label freeze <<< "$sel"
+
+    local delay_options=(
+        $'Start Now\x1F--delay 0'
+        $'3 Seconds\x1F--delay 3'
+        $'5 Seconds\x1F--delay 5'
+        $'10 Seconds\x1F--delay 10'
+    )
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Delay:" "${delay_options[@]}")"; then
+        return 1
+    fi
+
+    IFS=$'\x1F' read -r label delay <<< "$sel"
+    run_in_background "screencapture screenshot $mode $freeze $delay"
+}
+
+screenrecord_menu() {
+    local options=(
+        $'Record Screen\x1Fscreencapture recorder start output'
+        $'Record window\x1Fscreencapture recorder start window'
+        $'Record Region\x1Fscreencapture recorder start region'
+        $'Advanced Options\x1Fwmmenu capture screenrecord advance'
+    )
+    if [ -f "$(screencapture recorder pid)" ]; then
+        options=(
+            $'Stop Recording\x1Fscreencapture recorder stop'
+        )
+    fi
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Recording:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+screenrecord_menu_advance() {
+    local mode_options=(
+        $'Screen\x1Fscreen'
+        $'Window\x1Fwindow'
+        $'Region\x1Fregion'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Record area:" "${mode_options[@]}")"; then
+        return 1
+    fi
+
+    IFS=$'\x1F' read -r label mode <<< "$sel"
+
+    local audio_options=(
+        $'With Audio\x1F--audio'
+        $'No Audio\x1F--no-audio'
+    )
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Audio:" "${audio_options[@]}")"; then
+        return 1
+    fi
+
+    IFS=$'\x1F' read -r label audio <<< "$sel"
+
+    local delay_options=(
+        $'Start Now\x1F--delay 0'
+        $'3 Seconds\x1F--delay 3'
+        $'5 Seconds\x1F--delay 5'
+        $'10 Seconds\x1F--delay 10'
+    )
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Delay:" "${delay_options[@]}")"; then
+        return 1
+    fi
+
+    IFS=$'\x1F' read -r label delay <<< "$sel"
+    run_in_background "screencapture recorder start $mode $audio $delay"
+}
+
+capture_menu() {
+    local options=(
+        $'Screenshots\x1Fwmmenu capture screenshot'
+        $'Recording\x1Fwmmenu capture screenrecord'
+        $'OCR\x1Fscreencapture ocr'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Capture:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+emoji_menu() {
+    rofimoji \
+        --hidden-descriptions \
+        --selector-args="-config $EMOJI_CONFIG" \
+        --action copy type \
+        --skin-tone ask \
+        --typer wtype \
+        --clipboarder wl-copy
+}
+
+colorpicker_menu() {
+    local options=(
+        $'HEX\x1Fcolorpicker hex'
+        $'RGB\x1Fcolorpicker rgb'
+        $'HSL\x1Fcolorpicker hsl'
+        $'HSV\x1Fcolorpicker hsv'
+        $'CMYK\x1Fcolorpicker cmyk'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Color Picker:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+wallpaper_menu() {
+    local options=(
+        $'Play\x1Fwallpaper play'
+        $'Pause\x1Fwallpaper pause'
+        $'Next\x1Fwallpaper next'
+        $'Previous\x1Fwallpaper prev'
+        $'Reload\x1Fwallpaper reload'
+        $'Toggle Theme\x1Fwallpaper toggle-thems'
+        $'Select Wallpaper\x1Fwmmenu wallpaper select'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Wallpaper:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+wallpaper_select_menu() {
+    local selected
+
+    selected=$(wallpaper find | while read img; do
+        echo -en "$(basename "$img")\x00icon\x1f$img\n"
+    done | rofi -dmenu -show-icons)
+
+    if [ -n "$selected" ]; then
+        local full_path=$(wallpaper find | grep "/$selected$")
+        wallpaper set "$full_path"
+    fi
+}
+
+locale_menu() {
+    local locale
+    local options=()
+    local sel
+
+    while read -r locale; do
+        options+=("$locale"$'\x1F'"localeman set $layout")
+    done < <(localeman list)
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Locale:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+kblayout_menu() {
+    local options=()
+    local layout
+    local sel
+
+    while read -r layout; do
+        options+=("$layout"$'\x1F'"kbmapman set $layout")
+    done < <(kbmapman list)
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Keyboard Layout:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+mode_menu() {
+    local options=()
+    local mode
+    local sel
+
+    while read -r mode; do
+        options+=("$(wmmode display "$mode")"$'\x1F'"wmmode toggle $mode")
+    done < <(wmmode list)
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Mode:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+tool_menu() {
+    local options=(
+        $'Launcher\x1Fwmmenu launcher'
+        $'Clipboard\x1Fwmmenu clipboard'
+        $'Capture\x1Fwmmenu capture'
+        $'Mode\x1Fwmmenu mode'
+        $'Emoji\x1Fwmmenu emoji'
+        $'Color Picker\x1Fwmmenu colorpicker'
+        $'Locale\x1Fwmmenu locale'
+        $'Keyboard Layout\x1Fwmmenu kblayout'
+    )
+    local sel
+
+    if ! sel="$(show_rofi_menu "$MENU_CONFIG" "Main Menu:" "${options[@]}")"; then
+        return 0
+    fi
+
+    IFS=$'\x1F' read -r label cmd <<< "$sel"
+    run_in_background "$cmd"
+}
+
+case "$1" in
+    "launcher") rofi -show drun ;;
+    "clipboard")
+        case "$2" in
+            "") clipboard_menu ;;
+            "advance") clipboard_menu_adv ;;
+        esac
+    ;;
+    "capture")
+        case "$2" in
+            "") capture_menu ;;
+            "screenshot")
+                case "$3" in
+                    "") screenshot_menu ;;
+                    "advance") screenshot_menu_advance ;;
+                esac
+            ;;
+            "screenrecord")
+                case "$3" in
+                    "") screenrecord_menu ;;
+                    "advance") screenrecord_menu_advance ;;
+                esac
+            ;;
+        esac
+    ;;
+    "colorpicker") colorpicker_menu ;;
+    "emoji") emoji_menu ;;
+    "mode") mode_menu ;;
+    "tool") tool_menu ;;
+    "wallpaper")
+        case "$2" in
+            "") wallpaper_menu ;;
+            "select") wallpaper_select_menu ;;
+        esac
+    ;;
+    "locale") locale_menu ;;
+    "kblayout") kblayout_menu ;;
+    "shader") shader_menu ;;
+esac

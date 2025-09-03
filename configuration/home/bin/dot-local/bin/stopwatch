@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+run_stopwatch() {
+    local start_time=$(date +%s%6N)
+    local paused=false
+    local pause_duration=0
+    local pause_start=0
+    local lap_count=0
+    local last_lap_time=$start_time
+    local laps=()
+
+    stty -echo -icanon time 0 min 0
+
+    while true; do
+        clear
+        echo "Stopwatch"
+        echo "========="
+        echo
+
+        local now=$(date +%s%6N)
+        local elapsed=0
+
+        if [[ "$paused" == "true" ]]; then
+            elapsed=$((pause_start - start_time - pause_duration))
+            echo "Status: PAUSED"
+        else
+            elapsed=$((now - start_time - pause_duration))
+            echo "Status: RUNNING"
+        fi
+        echo
+
+        local h=$((elapsed / 3600000000))
+        local m=$(( (elapsed % 3600000000) / 60000000 ))
+        local s=$(( (elapsed % 60000000) / 1000000 ))
+        local us=$((elapsed % 1000000))
+
+        printf "%02d:%02d:%02d.%06d\n\n" "$h" "$m" "$s" "$us"
+
+        if [[ ${#laps[@]} -gt 0 ]]; then
+            echo "Laps:"
+            echo "-----"
+            printf "%-5s %-15s %s\n" "Lap" "Lap Time" "Total Time"
+            for lap in "${laps[@]}"; do
+                echo "$lap"
+            done
+            echo
+        fi
+
+        echo "[p] pause/resume  [l] lap  [r] reset  [q] quit"
+        read -t 1 -n 1 key
+
+        case "$key" in
+            p|P)
+                if [[ "$paused" == "true" ]]; then
+                    pause_duration=$((pause_duration + now - pause_start))
+                    paused=false
+                else
+                    pause_start=$now
+                    paused=true
+                fi
+                ;;
+            l|L)
+                if [[ "$paused" == "false" ]]; then
+                    lap_count=$((lap_count + 1))
+                    local lap_elapsed=$((now - last_lap_time))
+                    last_lap_time=$now
+
+                    local lh=$((lap_elapsed / 3600000000))
+                    local lm=$(( (lap_elapsed % 3600000000) / 60000000 ))
+                    local ls=$(( (lap_elapsed % 60000000) / 1000000 ))
+                    local lus=$((lap_elapsed % 1000000))
+
+                    local lap_fmt=$(printf "%02d:%02d:%02d.%06d" "$lh" "$lm" "$ls" "$lus")
+                    local total_fmt=$(printf "%02d:%02d:%02d.%06d" "$h" "$m" "$s" "$us")
+                    laps+=("$(printf "%-5d %-15s %s" "$lap_count" "$lap_fmt" "$total_fmt")")
+                fi
+                ;;
+            r|R)
+                start_time=$(date +%s%6N)
+                last_lap_time=$start_time
+                pause_duration=0
+                paused=false
+                lap_count=0
+                laps=()
+                ;;
+            q|Q)
+                break
+                ;;
+        esac
+    done
+
+    stty echo icanon
+    clear
+}
+
+run_stopwatch

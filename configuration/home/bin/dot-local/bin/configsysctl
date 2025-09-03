@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+SERVICES_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}/sysctl"
+
+usage() {
+    echo "Usage: $0 {start|stop|enable|disable|restart|status} [service|*]"
+    exit 1
+}
+
+[ $# -eq 0 ] && usage
+
+cmd="$1"
+service="${2:-*}"
+
+case "$cmd" in
+    start|stop|enable|disable|restart|status) ;;
+    *) echo "Error: Invalid command '$cmd'"; usage ;;
+esac
+
+[ ! -d "$SERVICES_DIR" ] && { echo "Error: Services directory not found: $SERVICES_DIR"; exit 1; }
+
+for script in "$SERVICES_DIR"/*.sh; do
+    [ -f "$script" ] && [ -r "$script" ] && source "$script"
+done
+
+if [ "$service" = "*" ]; then
+    for script in "$SERVICES_DIR"/*; do
+        [ -f "$script" ] || continue
+        name=$(basename "$script")
+
+        if type "service_$name" >/dev/null 2>&1; then
+            service_"$name" "$cmd"
+        fi
+    done
+else
+    if type "service_$service" >/dev/null 2>&1; then
+        service_"$service" "$cmd"
+    else
+        echo "Error: Service '$service' not found"
+        exit 1
+    fi
+fi

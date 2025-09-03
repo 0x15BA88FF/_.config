@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_bluetooth() {
+    case "$1" in
+        start)   systemctl start bluetooth.service ;;
+        stop)    systemctl stop bluetooth.service ;;
+        enable)  systemctl enable bluetooth.service ;;
+        disable) systemctl disable bluetooth.service ;;
+        restart) systemctl restart bluetooth.service ;;
+        status)  systemctl status --no-pager bluetooth.service ;;
+    esac
+}

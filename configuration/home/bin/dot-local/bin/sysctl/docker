@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_docker() {
+    case "$1" in
+        start)   systemctl start docker.service ;;
+        stop)    systemctl stop docker.service ;;
+        enable)  systemctl enable docker.service ;;
+        disable) systemctl disable docker.service ;;
+        restart) systemctl restart docker.service ;;
+        status)  systemctl status --no-pager docker.service ;;
+    esac
+}

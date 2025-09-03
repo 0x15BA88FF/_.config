@@ -1,0 +1,169 @@
+@import "./colors.css";
+
+* {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font-size: 12px;
+    box-shadow: none;
+    font-weight: normal;
+    background-image: none;
+    border: 0 solid @background;
+    transition: all 0.2s ease-in-out;
+    font-family: "JetBrainsMonoNerdFontPropo", "Noto Sans", sans-erif;
+}
+
+window {
+    color: @on_surface;
+    background-color: transparent;
+}
+
+tooltip {
+    border-width: 2px;
+    border-radius: 10px;
+    background-color: @background;
+}
+
+trough {
+    min-width: 100px;
+    border-radius: 999px;
+    background-color: @on_secondary;
+}
+
+slider {
+    background: none;
+}
+
+highlight {
+    border-radius: 999px;
+    background-color: @primary;
+}
+
+.modules-left { padding: 4px 0px 4px 8px; }
+.modules-right { padding: 4px 8px 4px 0px; }
+.modules-center { padding: 4px 0px 4px 0px; }
+
+#mpd,
+#cpu,
+#tray,
+#disk,
+#mpris,
+#clock,
+#memory,
+#window,
+#taskbar,
+#battery,
+#network,
+#language,
+#bluetooth,
+#backlight,
+#pulseaudio,
+#workspaces,
+#custom-end,
+#custom-padd,
+#custom-start,
+#idle_inhibitor,
+#custom-notifications {
+    padding: 0.5px;
+    background: @background;
+}
+
+#mpris {
+    padding: 0 10px;
+    border-radius: 999px;
+    background: @background;
+    animation: gradient 5s linear infinite;
+}
+
+#mpris.paused {
+    background-size: 400% 400%;
+}
+
+#mpris.playing {
+    color: @background;
+    background: linear-gradient(90deg, @primary 0%, @secondary 50%, @primary 100%);
+    background-size: 400% 400%;
+}
+
+#privacy {
+    color: @error;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: @background;
+}
+
+#taskbar, #workspaces {
+    padding: 2px;
+    border-radius: 999px;
+}
+
+#tray * {
+    margin: 3px 4px;
+    transition: all 0s;
+}
+
+#tray menu {
+    color: @on_surface;
+    border-radius: 8px;
+    background: @background;
+}
+
+#tray menu menuitem:hover {
+    color: @on_primary;
+    border-radius: 4px;
+    background: @primary;
+}
+
+#taskbar button, #workspaces button {
+    padding: 0 4px;
+    border-radius: 999px;
+}
+
+#taskbar button:hover, #workspaces button:hover {
+    background: @on_secondary;
+}
+
+#taskbar button.active, #workspaces button.focused {
+    padding: 0 16px;
+    color: @background;
+    background: @primary;
+}
+
+#backlight {
+    padding: 0 0 0 6px;
+    border-radius: 999px 0 0 999px;
+}
+
+#clock {
+    padding: 0 12px 0 0;
+    border-radius: 0 999px 999px 0;
+}
+
+#tray {
+    padding: 0 6px;
+    border-radius: 999px;
+}
+
+#custom-notifications {
+    padding: 0 9px;
+    border-radius: 999px;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 200%;
+    }
+    50% {
+        background-position: 200% 0%;
+    }
+    100% {
+        background-position: 400% 200%;
+    }
+}
+
+@keyframes critical {
+    to {
+        background-color: @on_surface;
+        color: @on_error;
+    }
+}

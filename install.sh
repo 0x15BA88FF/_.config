@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
+
 set -e
+set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOME_CONFIG="$REPO_DIR/configuration/home"
@@ -7,20 +9,13 @@ ROOT_CONFIG="$REPO_DIR/configuration/root"
 
 install_packages() {
     echo "Installing packages..."
-    sh ./packages/core.sh
-    sh ./packages/base.sh
-    sh ./packages/play.sh
+    sh ./packages.sh
+}
 
-    echo "Select a window manager:"
-    echo "1) i3"
-    echo "2) Hyprland"
-    read -p "Enter your choice (1-2): " choice
-
-    case $choice in
-        1) sh ./packages/i3.sh ;;
-        2) sh ./packages/hyprland.sh ;;
-        *) echo "Invalid option." ;;
-    esac
+install_packages() {
+    echo "Enabling services..."
+    ./configuration/home/bin/dot-local/bin/configsysctl start *
+    ./configuration/home/bin/dot-local/bin/configsysctl enable *
 }
 
 stow_packages() {
@@ -49,29 +44,20 @@ install_dotfiles() {
     fi
 }
 
-main() {
-    echo "What would you like to do?"
-    echo "1) Install packages and dotfiles"
-    echo "2) Install packages only"
-    echo "3) Install dotfiles only"
-    read -p "Enter your choice (1-3): " main_choice
+echo "1) Install packages, dotfiles and enable services"
+echo "2) Install packages only"
+echo "3) Install dotfiles only"
+echo "4) Enable services"
+read -p "Enter your choice (1-3): " choice
 
-    case $main_choice in
-        1)
-            install_packages
-            install_dotfiles
-            ;;
-        2)
-            install_packages
-            ;;
-        3)
-            install_dotfiles
-            ;;
-        *)
-            echo "Invalid option."
-            exit 1
-            ;;
-    esac
-}
-
-main
+case $choice in
+    1)
+        install_packages
+        install_dotfiles
+        enable_services
+        ;;
+    2) install_packages ;;
+    3) install_dotfiles ;;
+    1) enable_services ;;
+    *) exit 1 ;;
+esac

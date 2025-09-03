@@ -1,0 +1,130 @@
+@import "./colors.css";
+
+* {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font-size: 16px;
+    box-shadow: none;
+    font-weight: normal;
+    background-image: none;
+    border: 0 solid @background;
+    transition: all 0.2s ease-in-out;
+    font-family: "JetBrainsMonoNerdFontPropo", "Noto Sans", sans-erif;
+}
+
+switch {
+    padding: 2px;
+    border-radius: 999px;
+    background-color: @on_secondary;
+}
+switch:checked {
+    background-color: @primary;
+}
+switch slider, switch:checked slider {
+    background: @background;
+}
+
+/* .control-center-list */
+
+.notification, .control-center {
+    margin: 8px;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    color: @on_surface;
+    background-color: @surface;
+}
+.notification {
+    padding: 1rem;
+    border: 2px solid @on_secondary;
+}
+.notification-group {
+    margin-top: 1rem;
+}
+.notification-group .revealer {
+    padding: 1rem 0;
+}
+.notification-group:focus {
+    background-color: transparent;
+}
+.notification-group-headers {
+    padding-left: 0.5rem;
+}
+.notification-group-icon {
+    margin-right: 0.5rem;
+}
+.notification-group-buttons {
+    padding-left: 0.5rem;
+}
+.notification-default-action:hover {
+    background-color: transparent;
+}
+.notification image.image {
+    margin-right: 0.5rem;
+}
+
+.widget-dnd {
+    margin-top: 1rem;
+}
+
+.widget-menubar .widget-menubar-container {
+    padding: 0.25rem;
+    border-radius: 0.8rem;
+    background-color: @on_secondary;
+}
+.widget-menubar .widget-menubar-container button {
+    background: none;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.6rem;
+}
+.widget-menubar .widget-menubar-container button:hover {
+    background-color: @background;
+}
+
+.widget-menubar revealer > box {
+    padding: 0.25rem;
+    margin-top: 0.5rem;
+    border-radius: 0.8rem;
+    background-color: @on_secondary;
+}
+.widget-menubar revealer button {
+    padding: 0.5rem;
+    border-radius: 0.6rem;
+    background-color: @on_secondary;
+}
+.widget-menubar revealer button:hover {
+    background-color: @surface;
+}
+
+.widget-mpris-player {
+    padding: 0.5rem;
+    background: @surface;
+}
+.mpris-background {
+    background-image: none;
+}
+.mpris-overlay {
+    background: none;
+}
+.widget-mpris-player button {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    margin-top: 1rem;
+}
+.widget-mpris-title { font-size: 1.25rem; }
+.widget-mpris-subtitle { font-size: 1rem; }
+
+
+.widget-buttons-grid {
+    padding: 0.25rem;
+    border-radius: 0.8rem;
+    background-color: @on_secondary;
+}
+
+.widget-buttons-grid button {
+    padding: 0.5rem 0.7rem 0.5rem 0.5rem;
+    border-radius: 0.5rem;
+    color: @secondary;
+    background-color: @on_secondary;
+}
+.widget-buttons-grid button:hover { background-color: @surface; }

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_ollama() {
+    case "$1" in
+        start)   systemctl start ollama.service ;;
+        stop)    systemctl stop ollama.service ;;
+        enable)  systemctl enable ollama.service ;;
+        disable) systemctl disable ollama.service ;;
+        restart) systemctl restart ollama.service ;;
+        status)  systemctl status --no-pager ollama.service ;;
+    esac
+}

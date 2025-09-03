@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+systemctl --user daemon-reload
+
+service_aria2() {
+    case "$1" in
+        start)   systemctl --user start aria2cd.service ;;
+        stop)    systemctl --user stop aria2cd.service ;;
+        enable)  systemctl --user enable --now aria2cd.service ;;
+        disable) systemctl --user disable aria2cd.service ;;
+        restart) systemctl --user restart aria2cd.service ;;
+        status)  systemctl --user status --no-pager aria2cd.service ;;
+    esac
+}

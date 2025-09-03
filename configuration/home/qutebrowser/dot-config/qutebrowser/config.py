@@ -29,11 +29,9 @@ c.tabs.background = True
 
 c.statusbar.show = "never"
 
-c.fonts.default_family = ["Noto Sans"]
 c.fonts.default_size = "10pt"
-
 c.fonts.web.size.default = 14
-
+c.fonts.default_family = ["Noto Sans"]
 c.fonts.web.family.fixed = "Noto Mono"
 c.fonts.web.family.serif = "Noto Serif"
 c.fonts.web.family.standard = "Noto Sans"
@@ -91,7 +89,6 @@ c.content.blocking.adblock.lists = [
     "https://github.com/uBlockOrigin/uAssets/raw/master/filters/unbreak.txt"
 ]
 
-# === Keybindings ===
 config.bind("cu", "config-source colors.py")
 config.bind("cs", "cmd-set-text -s :config-source")
 config.bind("tt", "config-cycle tabs.show multiple never")
@@ -101,8 +98,3 @@ config.bind("pp", "open -- {clipboard}")
 config.bind("pt", "open -t -- {clipboard}")
 config.bind("gJ", "tab-move +")
 config.bind("gK", "tab-move -")
-
-# === Styles ===
-# c.content.user_stylesheets = [
-#     "~/.config/qutebrowser/styles/youtube-tweaks.css"
-# ]

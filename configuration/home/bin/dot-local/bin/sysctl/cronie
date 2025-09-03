@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_cronie() {
+    case "$1" in
+        start)   systemctl start cronie.service ;;
+        stop)    systemctl stop cronie.service ;;
+        enable)  systemctl enable cronie.service ;;
+        disable) systemctl disable cronie.service ;;
+        restart) systemctl restart cronie.service ;;
+        status)  systemctl status --no-pager cronie.service ;;
+    esac
+}

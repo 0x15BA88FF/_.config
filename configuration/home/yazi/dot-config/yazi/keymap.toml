@@ -7,3 +7,7 @@ desc = "Copy into system clipboard"
 on   = ["c", "x"]
 run  = "shell 'cb clear & cb cut \"$@\"'"
 desc = "Cut into system clipboard"
+
+[[mgr.prepend_keymap]]
+on  = "M"
+run = "plugin mount"

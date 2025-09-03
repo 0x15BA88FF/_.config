@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+MODES_DIR="$HOME/.config/modes"
+mkdir -p "$MODES_DIR"
+
+declare -A MODE_NAME
+declare -A MODE_ENABLE_CMD
+declare -A MODE_DISABLE_CMD
+
+MODE_ENABLE_CMD["idle-inhibit"]="systemd-inhibit --what=idle --who='Mode Script' --why='Manual idle inhibit' sleep infinity &"
+MODE_DISABLE_CMD["idle-inhibit"]="pkill -f 'systemd-inhibit.*idle.*Mode Script'"
+MODE_NAME["idle-inhibit"]="Idle Inhibitor"
+
+is_mode_enabled() {
+    local mode="$1"
+    [ -f "$MODES_DIR/$mode.enabled" ]
+}
+
+enable_mode() {
+    local mode="$1"
+    [ -z "${MODE_ENABLE_CMD[$mode]}" ] && return 1
+    is_mode_enabled "$mode" && return 0
+    eval "${MODE_ENABLE_CMD[$mode]}" && touch "$MODES_DIR/$mode.enabled" || return 1
+}
+
+disable_mode() {
+    local mode="$1"
+    [ -z "${MODE_ENABLE_CMD[$mode]}" ] && return 1
+    ! is_mode_enabled "$mode" && return 0
+    eval "${MODE_DISABLE_CMD[$mode]}" && rm -f "$MODES_DIR/$mode.enabled" || return 1
+}
+
+toggle_mode() {
+    local mode="$1"
+    is_mode_enabled "$mode" && disable_mode "$mode" || enable_mode "$mode"
+}
+
+show_status() {
+    local mode="$1"
+    [[ -z "${MODE_NAME[$mode]}" ]] && return 1
+    is_mode_enabled "$mode" && echo "ENABLED" || echo "DISABLED"
+}
+
+list_modes() {
+    for mode in "${!MODE_NAME[@]}"; do
+        echo "$mode"
+    done
+}
+
+display_mode() {
+    local mode="$1"
+    echo "$(show_status "$mode") ${MODE_NAME[$mode]}"
+}
+
+case "$1" in
+    "enable") enable_mode "$2" ;;
+    "disable") disable_mode "$2" ;;
+    "toggle") toggle_mode "$2" ;;
+    "status") show_status "$2" ;;
+    "list") list_modes ;;
+    "display") display_mode "$2" ;;
+esac

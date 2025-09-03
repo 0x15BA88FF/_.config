@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_sshd() {
+    case "$1" in
+        start) systemctl --user start sshd ;;
+        stop) systemctl --user stop sshd ;;
+        enable) systemctl --user enable sshd ;;
+        disable) systemctl --user disable sshd ;;
+        restart) systemctl --user restart sshd ;;
+        status) systemctl --user status --no-pager sshd ;;
+    esac
+}

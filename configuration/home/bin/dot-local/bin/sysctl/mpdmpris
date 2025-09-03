@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_mpdmpris() {
+    case "$1" in
+        start)   systemctl --user start mpd-mpris ;;
+        stop)    systemctl --user stop mpd-mpris ;;
+        enable)  systemctl --user enable mpd-mpris ;;
+        disable) systemctl --user disable mpd-mpris ;;
+        restart) systemctl --user restart mpd-mpris ;;
+        status)  systemctl --user status --no-pager mpd-mpris ;;
+    esac
+}

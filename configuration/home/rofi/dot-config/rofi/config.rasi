@@ -8,7 +8,7 @@ configuration {
     display-run:                "RUN";
     display-window:             "WINDOW";
     drun-display-format:        "{name}";
-    font:                        "JetBrains Mono Nerd Font 10";
+    font:                        "JetBrainsMonoNerdFontMono 10";
 }
 
 window {

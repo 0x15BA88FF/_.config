@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_tor() {
+    case "$1" in
+        start)   systemctl start tor.service ;;
+        stop)    systemctl stop tor.service ;;
+        enable)  systemctl enable tor.service ;;
+        disable) systemctl disable tor.service ;;
+        restart) systemctl restart tor.service ;;
+        status)  systemctl status --no-pager tor.service ;;
+    esac
+}

@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Text Editor
-Exec=nvim
-Terminal=true
-NoDisplay=true
-StartupWMClass=textedit

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_tailscale() {
+    case "$1" in
+        start)   systemctl start tailscaled.service ;;
+        stop)    systemctl stop tailscaled.service ;;
+        enable)  systemctl enable tailscaled.service ;;
+        disable) systemctl disable tailscaled.service ;;
+        restart) systemctl restart tailscaled.service ;;
+        status)  systemctl status --no-pager tailscaled.service ;;
+    esac
+}

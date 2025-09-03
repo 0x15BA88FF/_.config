@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+install() {
+    sudo groupadd uinput
+    sudo usermod -aG input $USER
+    sudo usermod -aG uinput $USER
+    echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-input.rules > /dev/null
+    sudo udevadm control --reload && udevadm trigger --verbose --sysname-match=uniput
+    sudo modprobe uinput
+}
+
+uninstall() {
+    sudo modprobe -r uinput
+    sudo rm /etc/udev/rules.d/99-input.rules
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+    sudo gpasswd -d $USER input
+    sudo gpasswd -d $USER uinput
+    sudo groupdel uinput
+    groups $USER
+}
+
+systemctl --user daemon-reload
+
+case "$1" in
+    start)
+        install
+        systemctl --user start kanata.service ;;
+    stop)
+        uninstall
+        systemctl --user stop kanata.service ;;
+    enable)
+        uninstall
+        systemctl --user enable kanata.service ;;
+    disable)
+        uninstall
+        systemctl --user disable kanata.service ;;
+    restart)
+        systemctl --user restart kanata.service ;;
+    status)
+        systemctl --user status --no-pager kanata.service ;;
+esac

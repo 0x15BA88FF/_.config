@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+
+RECORDING_DIR="${XDG_VIDEOS_DIR:-$HOME/videos}/screenrecordings"
+SCREENSHOT_DIR="${XDG_PICTURES_DIR:-$HOME/pictures}/screenshots"
+PID_FILE="/tmp/screenrecord.pid"
+TMP_DIR="/tmp"
+
+check_dependencies() {
+    for dep in "$@"; do
+        if ! command -v "$dep" >/dev/null; then
+            notify-send "Missing Dependency" "$dep not found"
+            exit 1
+        fi
+    done
+}
+
+countdown() {
+    local seconds=$1
+    if [ "$seconds" -gt 0 ]; then
+        for ((i = seconds; i > 0; i--)); do
+            notify-send -e -a screencapture -u low -t 1000 "Starting in..." "$i seconds"
+            sleep 1
+        done
+    fi
+}
+
+screenshot() {
+    check_dependencies grim
+    mkdir -p "$SCREENSHOT_DIR"
+
+    local mode=""
+    local freeze=""
+    local delay=""
+    local capture_area=""
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            "screen"|"window"|"region") mode="$1"; shift ;;
+            "--freeze"|"--no-freeze") freeze="$1"; shift ;;
+            "--delay") delay="$2"; shift 2 ;;
+            *) shift ;;
+        esac
+    done
+
+    mode="${mode:-screen}"
+    delay="${delay:-0}"
+    local file="$SCREENSHOT_DIR/$(date +%Y%m%d%H%M%S).png"
+
+    case "$mode" in
+        "screen") capture_area="" ;;
+        "region"|"window") 
+            check_dependencies slurp
+            capture_area="$(slurp)" || return 1
+        ;;
+    esac
+
+    [ "$delay" -gt 0 ] && countdown "$delay"
+    [ "$freeze" = "--freeze" ] && killall -STOP $(pgrep -x sway) 2>/dev/null
+    [ -n "$capture_area" ] && grim -g "$capture_area" "$file" || grim "$file"
+    [ "$freeze" = "--freeze" ] && killall -CONT $(pgrep -x sway) 2>/dev/null
+
+    notify-send "Screenshot Saved" "$(basename "$file")"
+}
+
+start_recording() {
+    check_dependencies wf-recorder
+    mkdir -p "$RECORDING_DIR"
+
+    local mode=""
+    local audio=""
+    local delay=""
+    local capture_area=""
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            "screen"|"window"|"region") mode="$1"; shift ;;
+            "--audio"|"--no-audio") audio="$1"; shift ;;
+            "--delay") delay="$2"; shift 2 ;;
+            *) shift ;;
+        esac
+    done
+
+    mode="${mode:-screen}"
+    delay="${delay:-0}"
+
+    local file="$RECORDING_DIR/$(date +%Y%m%d%H%M%S).mkv"
+
+    [ -f "$PID_FILE" ] && stop_recording
+
+    case "$mode" in
+        "screen") capture_area="" ;;
+        "region"|"window") 
+            check_dependencies slurp
+            capture_area="$(slurp -w 0)" || return 1
+        ;;
+    esac
+
+    [ "$delay" -gt 0 ] && countdown "$delay"
+
+    local -a cmd
+    cmd=(wf-recorder -f "$file")
+
+    [ -n "$capture_area" ] && cmd+=(-g "$capture_area")
+    [ "$audio" = "--audio" ] && cmd+=(-a)
+
+    "${cmd[@]}" &
+    echo "$!" > "$PID_FILE"
+    notify-send "Recording Started" "$(basename "$file")"
+}
+
+stop_recording() {
+    if [ -f "$PID_FILE" ]; then
+        local pid=$(cat "$PID_FILE")
+
+        kill "$pid" 2>/dev/null
+        killall wf-recorder
+        rm -f "$PID_FILE"
+        notify-send "Recording Stopped" "Video saved"
+    fi
+}
+
+ocr() {
+    check_dependencies grim slurp tesseract wl-copy
+
+    local delay=0
+
+    while getopts "t:" opt; do
+        case $opt in
+            t) delay="$OPTARG" ;;
+        esac
+    done
+
+    local img_path="$TMP_DIR/$(date +%s)_$(openssl rand -hex 4).png"
+    trap "rm -f $img_path" EXIT
+
+    local capture_area="$(slurp)" || return 1
+    [ "$delay" -gt 0 ] && countdown "$delay"
+
+    if grim -g "$capture_area" "$img_path"; then
+        if tesseract "$img_path" - | wl-copy; then
+            notify-send "Text extraction successful" "Copied to clipboard"
+        else
+            notify-send "Text extraction failed"
+        fi
+    fi
+}
+
+case "$1" in
+    "screenshot") shift; screenshot "$@" ;;
+    "recorder") case "$2" in
+        "pid") echo "$PID_FILE" ;;
+        "start") shift; start_recording "$@" ;;
+        "stop") stop_recording ;;
+    esac;;
+    "ocr") shift; ocr "$@" ;;
+    *) echo "Usage: $0 {screenshot|record [start|stop]|ocr}" ;;
+esac

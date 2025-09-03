@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=File Manager
-Exec=yazi
-Terminal=true
-NoDisplay=true
-StartupWMClass=files

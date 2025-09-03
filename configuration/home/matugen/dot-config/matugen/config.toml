@@ -1,3 +1,16 @@
+[config.wallpaper]
+command = "swww"
+arguments = [
+    "img",
+    "--resize", "crop",
+    "--filter", "Lanczos3",
+    "--fill-color", "000000",
+    "--transition-fps", "60",
+    "--transition-duration", "3",
+    "--transition-type", "random",
+    "--transition-bezier", "0.4,0.2,0.4,1.0"
+]
+
 [config.custom_colors]
 red = "#f38ba8"
 green = "#a6e3a1"
@@ -19,7 +32,16 @@ rounded_3xl = "28"
 
 font_sans = "NotoSans-Regular"
 font_serif = "NotoSerif-Regular"
-font_mono = "JetBrainsMono Nerd Font"
+font_mono = "JetBrainsMonoNerdFontMono"
+
+[templates.waybar]
+input_path = "./templates/colors.css"
+output_path = "~/.config/waybar/colors.css"
+
+[templates.swaync]
+input_path = "./templates/colors.css"
+output_path = "~/.config/swaync/colors.css"
+post_hook = "swaync-client -rs"
 
 [templates.alacritty]
 input_path = "./templates/alacritty.toml"
@@ -48,4 +70,4 @@ output_path = "~/.config/btop/themes/matugen.theme"
 [templates.qutebrowser]
 input_path = "./templates/qutebrowser.json"
 output_path = "~/.config/qutebrowser/palettes/matugen.json"
-post_hook = "qutebrowser ':config-source colors.py'"
+post_hook = "pgrep -x qutebrowser >/dev/null && qutebrowser ':config-source colors.py'"

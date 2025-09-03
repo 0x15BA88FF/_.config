@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_networkmanager() {
+    case "$1" in
+        start)   systemctl start NetworkManager.service ;;
+        stop)    systemctl stop NetworkManager.service ;;
+        enable)  systemctl enable NetworkManager.service ;;
+        disable) systemctl disable NetworkManager.service ;;
+        restart) systemctl restart NetworkManager.service ;;
+        status)  systemctl status --no-pager NetworkManager.service ;;
+    esac
+}

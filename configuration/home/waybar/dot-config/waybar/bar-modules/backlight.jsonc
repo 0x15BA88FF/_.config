@@ -1,0 +1,28 @@
+{
+    "group/backlight": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 300,
+            "transition-left-to-right": false
+        },
+        "modules": [
+            "backlight",
+            "backlight/slider",
+        ]
+    },
+    "backlight": {
+        "format": "{icon}",
+        "tooltip-format": "Brightness",
+        "format-icons": [
+            "",
+            "󰃜",
+            "󰃛",
+            "",
+            "󰃞",
+            "󰃟",
+            "󰃠"
+        ],
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-"
+    }
+}

@@ -7,15 +7,14 @@
 _exists() { command -v "$1" &>/dev/null; }
 _source() { [[ -f "$1" ]] && source "$1"; }
 
-_source "$XDG_CONFIG_HOME/bash/input.sh"
-_source "$XDG_CONFIG_HOME/bash/options.sh"
 _source "$XDG_CONFIG_HOME/bash/preexec.sh"
-_source "$XDG_CONFIG_HOME/shell/aliasrc"
+_source "$XDG_CONFIG_HOME/bash/options.sh"
 _source "$XDG_CONFIG_HOME/shell/functions"
+_source "$XDG_CONFIG_HOME/shell/aliasrc"
+_source "$XDG_CONFIG_HOME/bash/input.sh"
 
 _exists fzf && eval "$(fzf --bash)"
 _exists atuin && eval "$(atuin init bash)"
-_exists direnv && eval "$(direnv hook bash)"
 _exists starship && eval "$(starship init bash)"
 
 preexec() { echo ""; }

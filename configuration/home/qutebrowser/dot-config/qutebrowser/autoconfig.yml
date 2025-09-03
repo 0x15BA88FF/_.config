@@ -6,8 +6,10 @@
 
 config_version: 2
 settings:
+  content.javascript.clipboard:
+    https://pass.proton.me: access-paste
   statusbar.show:
-    global: always
+    global: never
   tabs.background:
     global: true
   tabs.position:

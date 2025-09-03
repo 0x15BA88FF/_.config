@@ -1,0 +1,457 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import json
+import time
+import random
+import argparse
+import subprocess
+import signal
+from pathlib import Path
+from contextlib import contextmanager
+from typing import List, Optional, Generator
+from dataclasses import dataclass, asdict, field
+
+
+@dataclass
+class WallpaperState:
+    is_dark: bool = True
+    cache_index: int = 0
+    history_index: int = 0
+    history: List[str] = field(default_factory=list)
+    slideshow_pid: Optional[int] = None
+
+
+class WallpaperManager:
+    DEFAULT_INTERVAL: int = 300
+    DEFAULT_HISTORY_SIZE: int = 100
+    SUPPORTED_FORMATS: set[str] = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
+
+    def __init__(self) -> None:
+        self.shuffle: bool = self._get_bool_env('WALLPAPER_SHUFFLE', True)
+        self.interval: int = int(os.environ.get('WALLPAPER_INTERVAL', self.DEFAULT_INTERVAL))
+        self.history_size: int = int(os.environ.get('WALLHISTSIZE', self.DEFAULT_HISTORY_SIZE))
+
+        self.state_dir: Path = Path(os.environ.get('WALLPAPER_STATE', Path.home() / '.local/state/wallpaper'))
+        self.wallpapers_path: Path = Path(os.environ.get('WALLPAPER_DIR', Path.home() / '.local/share/wallpapers'))
+
+        self.state_file: Path = self.state_dir / 'state.json'
+        self.cache_file: Path = self.state_dir / 'cache.txt'
+        self.pid_file: Path = self.state_dir / 'slideshow.pid'
+        self._ensure_directories()
+
+    def _get_bool_env(self, key: str, default: bool) -> bool:
+        value: str = os.environ.get(key, '').lower()
+        if value in ('true', '1', 'yes', 'on'):
+            return True
+        if value in ('false', '0', 'no', 'off'):
+            return False
+        return default
+
+    def _theme_str(self, is_dark: bool) -> str:
+        return "dark" if is_dark else "light"
+
+    def _ensure_directories(self) -> None:
+        try:
+            self.state_dir.mkdir(parents=True, exist_ok=True)
+            if not self.wallpapers_path.exists():
+                raise FileNotFoundError(f"Wallpaper directory not found: {self.wallpapers_path}")
+        except Exception as e:
+            self._error(f"Failed to create directories: {e}")
+            sys.exit(1)
+
+    @contextmanager
+    def _error_handler(self, operation: str) -> Generator[None, None, None]:
+        try:
+            yield
+        except Exception as e:
+            self._error(f"Failed to {operation}: {e}")
+            raise
+
+    def _error(self, message: str) -> None:
+        print(f"[ERROR] {message}", file=sys.stderr)
+
+    def _info(self, message: str) -> None:
+        print(f"[INFO] {message}")
+
+    def _run_command(self, cmd: List[str], quiet: bool = True) -> bool:
+        try:
+            if quiet:
+                subprocess.run(cmd, check=True, capture_output=True, text=True)
+            else:
+                subprocess.run(cmd, check=True)
+            return True
+        except subprocess.CalledProcessError as e:
+            self._error(f"Command failed: {' '.join(cmd)} - {e}")
+            return False
+        except FileNotFoundError:
+            self._error(f"Command not found: {cmd[0]}")
+            return False
+
+    def load_state(self) -> WallpaperState:
+        if not self.state_file.exists():
+            return WallpaperState()
+
+        try:
+            with open(self.state_file, 'r') as f:
+                data = json.load(f)
+            return WallpaperState(**data)
+        except (json.JSONDecodeError, TypeError) as e:
+            self._error(f"Corrupted state file, creating new one: {e}")
+            return WallpaperState()
+
+    def save_state(self, state: WallpaperState) -> None:
+        try:
+            with open(self.state_file, 'w') as f:
+                json.dump(asdict(state), f, indent=2)
+        except Exception as e:
+            self._error(f"Failed to save state: {e}")
+
+    def discover_wallpapers(self) -> List[str]:
+        wallpapers: List[str] = []
+        for file_path in self.wallpapers_path.rglob('*'):
+            if file_path.is_file() and file_path.suffix.lower() in self.SUPPORTED_FORMATS:
+                wallpapers.append(str(file_path.resolve()))
+        if self.shuffle:
+            random.shuffle(wallpapers)
+        else:
+            wallpapers.sort()
+        return wallpapers
+
+    def update_cache(self) -> List[str]:
+        with self._error_handler("update wallpaper cache"):
+            wallpapers = self.discover_wallpapers()
+            if not wallpapers:
+                self._error("No wallpapers found in directory")
+                return []
+            with open(self.cache_file, 'w') as f:
+                f.write('\n'.join(wallpapers))
+            self._info(f"Cached {len(wallpapers)} wallpapers")
+            return wallpapers
+
+    def load_cache(self) -> List[str]:
+        if not self.cache_file.exists():
+            return self.update_cache()
+
+        try:
+            with open(self.cache_file, 'r') as f:
+                cache = [line.strip() for line in f if line.strip()]
+            valid_cache = [path for path in cache if Path(path).exists()]
+            if len(valid_cache) < len(cache) * 0.8:
+                self._info("Cache outdated, refreshing...")
+                return self.update_cache()
+            return valid_cache
+        except Exception as e:
+            self._error(f"Failed to load cache: {e}")
+            return self.update_cache()
+
+    def create_wallpaper_link(self, wallpaper_path: str) -> None:
+        link_path = self.wallpapers_path / 'current'
+        try:
+            if link_path.exists() or link_path.is_symlink():
+                link_path.unlink()
+            link_path.symlink_to(wallpaper_path)
+            self._info("Updated wallpaper symlink")
+        except Exception as e:
+            self._error(f"Failed to create wallpaper link: {e}")
+
+    def apply_wallpaper(self, wallpaper_path: str, is_dark: bool) -> bool:
+        if not Path(wallpaper_path).exists():
+            self._error(f"Wallpaper file not found: {wallpaper_path}")
+            return False
+        self._info(f"Applying wallpaper: {Path(wallpaper_path).name}")
+        self.create_wallpaper_link(wallpaper_path)
+        return self._run_command([
+            'matugen', '--quiet', '--mode', self._theme_str(is_dark), 'image', wallpaper_path
+        ])
+
+    def add_to_history(self, wallpaper_path: str, state: WallpaperState) -> None:
+        if wallpaper_path in state.history:
+            state.history.remove(wallpaper_path)
+        state.history.append(wallpaper_path)
+        if len(state.history) > self.history_size:
+            state.history = state.history[-self.history_size:]
+        state.history_index = len(state.history) - 1
+
+    def get_next_wallpaper(self) -> Optional[str]:
+        cache = self.load_cache()
+        if not cache:
+            return None
+        state = self.load_state()
+        if state.cache_index >= len(cache):
+            cache = self.update_cache()
+            state.cache_index = 0
+        if not cache:
+            return None
+        wallpaper = cache[state.cache_index]
+        state.cache_index += 1
+        self.add_to_history(wallpaper, state)
+        self.save_state(state)
+        return wallpaper
+
+    def set_wallpaper(self, wallpaper_path: str) -> bool:
+        state = self.load_state()
+        if self.apply_wallpaper(wallpaper_path, state.is_dark):
+            self.add_to_history(wallpaper_path, state)
+            self.save_state(state)
+            return True
+        return False
+
+    def next_wallpaper(self) -> bool:
+        state = self.load_state()
+        if state.history_index + 1 < len(state.history):
+            state.history_index += 1
+            wallpaper = state.history[state.history_index]
+            self.save_state(state)
+        else:
+            wallpaper = self.get_next_wallpaper()
+            if not wallpaper:
+                self._error("No wallpapers available")
+                return False
+        return self.apply_wallpaper(wallpaper, state.is_dark)
+
+    def previous_wallpaper(self) -> bool:
+        state = self.load_state()
+        if not state.history:
+            self._error("No wallpaper history")
+            return False
+        if state.history_index > 0:
+            state.history_index -= 1
+        else:
+            state.history_index = len(state.history) - 1
+        wallpaper = state.history[state.history_index]
+        self.save_state(state)
+        return self.apply_wallpaper(wallpaper, state.is_dark)
+
+    def set_theme(self, is_dark: bool) -> bool:
+        state = self.load_state()
+        state.is_dark = is_dark
+        self.save_state(state)
+        self._info(f"Theme set to {self._theme_str(is_dark)}")
+        if state.history:
+            current_wallpaper = state.history[state.history_index]
+            self.apply_wallpaper(current_wallpaper, is_dark)
+        return True
+
+    def toggle_theme(self) -> bool:
+        state = self.load_state()
+        return self.set_theme(not state.is_dark)
+
+    def reload_current(self) -> bool:
+        state = self.load_state()
+        if not state.history:
+            self._info("No current wallpaper, loading new one")
+            return bool(self.get_next_wallpaper())
+        current_wallpaper = state.history[state.history_index]
+        return self.apply_wallpaper(current_wallpaper, state.is_dark)
+
+    def find_wallpapers(self) -> None:
+        for wallpaper in self.discover_wallpapers():
+            print(wallpaper)
+
+    def save_slideshow_pid(self, pid: int) -> None:
+        try:
+            with open(self.pid_file, 'w') as f:
+                f.write(str(pid))
+        except Exception as e:
+            self._error(f"Failed to save slideshow PID: {e}")
+
+    def load_slideshow_pid(self) -> Optional[int]:
+        if not self.pid_file.exists():
+            return None
+        try:
+            with open(self.pid_file, 'r') as f:
+                return int(f.read().strip())
+        except Exception:
+            return None
+
+    def is_slideshow_running(self) -> bool:
+        pid = self.load_slideshow_pid()
+        if not pid:
+            return False
+        try:
+            os.kill(pid, 0)  # Check if process exists
+            return True
+        except OSError:
+            # Process doesn't exist, clean up pid file
+            try:
+                self.pid_file.unlink()
+            except Exception:
+                pass
+            return False
+
+    def stop_slideshow(self) -> bool:
+        pid = self.load_slideshow_pid()
+        if not pid:
+            self._info("No slideshow is currently running")
+            return False
+        
+        try:
+            os.kill(pid, signal.SIGTERM)
+            time.sleep(0.5)  # Give it time to terminate gracefully
+            
+            # Check if it's still running
+            try:
+                os.kill(pid, 0)
+                # Still running, force kill
+                os.kill(pid, signal.SIGKILL)
+            except OSError:
+                pass  # Process already terminated
+            
+            # Clean up pid file
+            try:
+                self.pid_file.unlink()
+            except Exception:
+                pass
+            
+            self._info("Slideshow stopped")
+            return True
+        except OSError:
+            self._info("Slideshow process not found (may have already stopped)")
+            try:
+                self.pid_file.unlink()
+            except Exception:
+                pass
+            return False
+
+    def play_slideshow(self) -> None:
+        if self.is_slideshow_running():
+            self._error("Slideshow is already running. Use 'pause' to stop it first.")
+            return
+        
+        # Save current process PID
+        self.save_slideshow_pid(os.getpid())
+        
+        self._info(f"Starting slideshow (interval: {self.interval}s, PID: {os.getpid()})")
+        try:
+            while True:
+                if not self.next_wallpaper():
+                    self._error("Failed to change wallpaper")
+                    time.sleep(5)
+                    continue
+                time.sleep(self.interval)
+        except KeyboardInterrupt:
+            self._info("Slideshow stopped")
+        finally:
+            # Clean up pid file
+            try:
+                self.pid_file.unlink()
+            except Exception:
+                pass
+
+    def show_status(self) -> None:
+        state = self.load_state()
+        cache = self.load_cache()
+        print(f"Theme: {self._theme_str(state.is_dark)}")
+        print(f"History size: {len(state.history)}/{self.history_size}")
+        print(f"Cache size: {len(cache)} wallpapers")
+        print(f"Current index: {state.history_index}")
+        print(f"Slideshow running: {'Yes' if self.is_slideshow_running() else 'No'}")
+        if state.history:
+            current = Path(state.history[state.history_index]).name
+            print(f"Current wallpaper: {current}")
+
+    def reset_state(self) -> bool:
+        # Stop slideshow if running
+        if self.is_slideshow_running():
+            self.stop_slideshow()
+        
+        self._info("Resetting wallpaper state...")
+        try:
+            if self.state_file.exists():
+                self.state_file.unlink()
+            if self.cache_file.exists():
+                self.cache_file.unlink()
+            if self.pid_file.exists():
+                self.pid_file.unlink()
+            link_path = self.wallpapers_path / 'current'
+            if link_path.exists() or link_path.is_symlink():
+                link_path.unlink()
+            self._info("State reset complete")
+            return True
+        except Exception as e:
+            self._error(f"Failed to reset state: {e}")
+            return False
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s next                    # Next wallpaper
+  %(prog)s prev                    # Previous wallpaper
+  %(prog)s set /path/to/image.jpg  # Set specific wallpaper
+  %(prog)s play                    # Start slideshow
+  %(prog)s pause                   # Stop slideshow
+  %(prog)s find                    # List all wallpapers
+  %(prog)s toggle-themes           # Toggle between light/dark theme
+        """
+    )
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers.add_parser('next', help='Set next wallpaper')
+    subparsers.add_parser('prev', help='Set previous wallpaper')
+    subparsers.add_parser('play', help='Start wallpaper slideshow')
+    subparsers.add_parser('pause', help='Stop wallpaper slideshow')
+    subparsers.add_parser('reload', help='Reload current wallpaper')
+    subparsers.add_parser('toggle-themes', help='Toggle between light and dark themes')
+    subparsers.add_parser('status', help='Show current status')
+    subparsers.add_parser('reset', help='Reset wallpaper state')
+    subparsers.add_parser('cache', help='Update wallpaper cache')
+    subparsers.add_parser('find', help='List all discovered wallpapers')
+
+    set_parser = subparsers.add_parser('set', help='Set specific wallpaper')
+    set_parser.add_argument('path', help='Path to wallpaper image')
+
+    theme_parser = subparsers.add_parser('theme', help='Set theme')
+    theme_parser.add_argument('theme', choices=['light', 'dark'], help='Theme to set')
+
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    try:
+        manager = WallpaperManager()
+    except Exception as e:
+        print(f"[ERROR] Failed to initialize wallpaper manager: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    success: bool = True
+    try:
+        if args.command == 'next':
+            success = manager.next_wallpaper()
+        elif args.command == 'prev':
+            success = manager.previous_wallpaper()
+        elif args.command == 'set':
+            success = manager.set_wallpaper(args.path)
+        elif args.command == 'play':
+            manager.play_slideshow()
+        elif args.command == 'pause':
+            success = manager.stop_slideshow()
+        elif args.command == 'reload':
+            success = manager.reload_current()
+        elif args.command == 'theme':
+            success = manager.set_theme(args.theme == "dark")
+        elif args.command == 'toggle-themes':
+            success = manager.toggle_theme()
+        elif args.command == 'status':
+            manager.show_status()
+        elif args.command == 'reset':
+            success = manager.reset_state()
+        elif args.command == 'cache':
+            manager.update_cache()
+        elif args.command == 'find':
+            manager.find_wallpapers()
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception:
+        sys.exit(1)
+
+    sys.exit(0 if success else 1)
+
+
+if __name__ == "__main__":
+    main()

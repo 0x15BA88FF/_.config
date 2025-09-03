@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+install() {
+    sudo ufw default deny incoming
+    sudo ufw default allow outgoing
+
+    sudo ufw allow ssh
+    sudo ufw allow 80/tcp
+    sudo ufw allow 443/tcp
+
+    sudo ufw enable
+}
+
+service_ufw() {
+    case "$1" in
+        start) systemctl --user start ufw.service && install ;;
+        stop)    systemctl --user stop ufw.service ;;
+        enable) systemctl --user enable ufw.service && install ;;
+        disable) systemctl --user disable ufw.service ;;
+        restart) systemctl --user restart ufw.service ;;
+        status) sudo ufw status verbose && systemctl --user status --no-pager ufw.service ;;
+    esac
+}

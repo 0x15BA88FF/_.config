@@ -3,7 +3,7 @@
 configuration {
     modi:                        [ drun ];
     show-icons:                  true;
-    font:                        "JetBrainsMono Nerd Font 10";
+    font:                        "JetBrainsMonoNerdFontMono 10";
 }
 
 window {

@@ -1,10 +1,15 @@
 # --- Startups
 
-exec --no-startup-id clipcatd &
+exec --no-startup-id clipcatd --no-daemon &
+exec --no-startup-id /usr/lib/lxqt-policykit/lxqt-policykit-agent &
+exec --no-startup-id swaync &
 exec --no-startup-id nm-applet &
 exec --no-startup-id blueman-applet &
-exec --no-startup-id $HOME/.local/bin/wallpaper.sh play &
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork &
+exec --no-startup-id tailscale-systray &
+exec --no-startup-id swww-daemon -f xrgb &
+exec --no-startup-id wallpaper play &
+exec --no-startup-id battutil watch &
+exec --no-startup-id xss-lock --transfer-sleep-lock -- wmctl lock &
 
 # --- Appearance
 
@@ -12,6 +17,16 @@ gaps inner 8
 gaps outer 0
 
 for_window [class="^.*"] border pixel 0
+for_window [app_id=".*"] opacity 0.8
+for_window [class=".*"] opacity 0.8
+
+blur enable
+blur_xray enable
+
+blur_passes 3
+blur_radius 5
+corner_radius 12
+smart_corner_radius enable
 
 # --- Keybinds
 
@@ -19,16 +34,12 @@ set $super Mod4
 set $submod Mod1
 
 floating_modifier $super
-tiling_drag modifier titlebar
 
 set $browser gtk-launch browser
 set $terminal gtk-launch terminal
-set $text-editor gtk-launch text-editor
-set $file-manager gtk-launch file-manager
 
 bindsym $super+q kill
-bindsym $super+Shift+c reload
-bindsym $super+Shift+r restart
+bindsym $super+Shift+r reload
 bindsym $super+Delete exec i3-msg exit
 bindsym $super+Escape exec loginctl lock-session
 
@@ -39,13 +50,18 @@ bindsym $super+Control+t floating enable, move position center
 bindsym F11 fullscreen toggle
 bindsym $super+Control+Return fullscreen toggle
 
-bindsym Control+Escape exec killall polybar || polybar
-bindsym $super+space exec pkill -x rofi || rofi -show drun
+bindsym Print exec wmmenu capture
+bindsym $super+Print exec wmmenu capture
+bindsym $super+M exec wmmenu mode
+bindsym $super+R exec wmmenu tool
+bindsym $super+V exec wmmenu clipboard
+bindsym $super+period exec wmmenu emoji
+bindsym $super+space exec wmmenu launcher
+bindsym Control+Escape exec wmbar toggle
+bindsym $super+n exec wmnotifications toggle
 
-bindsym $super+Return exec $terminal
-bindsym $super+e exec $file-manager
-bindsym $super+w exec $text-editor
 bindsym $super+b exec $browser
+bindsym $super+Return exec $terminal
 
 bindsym XF86AudioStop exec playerctl stop
 bindsym XF86AudioPlay exec playerctl play
@@ -83,8 +99,13 @@ bindsym $super+Control+j move down
 bindsym $super+Control+h move left
 bindsym $super+Control+l move right
 
-bindsym $submod+Control+h split h
+bindsym $super+Control+Shift+h resize grow width 10 px or 10 ppt
+bindsym $super+Control+Shift+j resize shrink height 10 px or 10 ppt
+bindsym $super+Control+Shift+k resize grow height 10 px or 10 ppt
+bindsym $super+Control+Shift+l resize shrink width 10 px or 10 ppt
+
 bindsym $super+Control+v split v
+bindsym $submod+Control+h split h
 
 bindsym $submod+d focus child
 bindsym $submod+a focus parent
@@ -113,8 +134,3 @@ bindsym $super+Shift+7 move container to workspace number "7"
 bindsym $super+Shift+8 move container to workspace number "8"
 bindsym $super+Shift+9 move container to workspace number "9"
 bindsym $super+Shift+0 move container to workspace number "10"
-
-bindsym $super+Control+Shift+h resize shrink width 10 px or 10 ppt
-bindsym $super+Control+Shift+j resize grow height 10 px or 10 ppt
-bindsym $super+Control+Shift+k resize shrink height 10 px or 10 ppt
-bindsym $super+Control+Shift+l resize grow width 10 px or 10 ppt

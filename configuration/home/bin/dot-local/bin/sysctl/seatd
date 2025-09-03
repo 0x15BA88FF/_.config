@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_seatd() {
+    case "$1" in
+        start)   systemctl start seatd.service ;;
+        stop)    systemctl stop seatd.service ;;
+        enable)  systemctl enable seatd.service ;;
+        disable) systemctl disable seatd.service ;;
+        restart) systemctl restart seatd.service ;;
+        status)  systemctl status --no-pager seatd.service ;;
+    esac
+}

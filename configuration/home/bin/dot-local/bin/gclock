@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+CLOCK_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gclock.sh"
+TIMEZONES_CONFIG="$CLOCK_CONFIG_DIR/timezones.conf"
+
+if [[ ! -f "$TIMEZONES_CONFIG" ]]; then
+    mkdir -p "$CLOCK_CONFIG_DIR"
+    cat > "$TIMEZONES_CONFIG" <<EOF
+    # Format: Label:Region/City
+    # Example:
+    # New York:America/New_York
+EOF
+fi
+
+format_time() {
+    local label="$1"
+    local timezone="$2"
+    local time=$(TZ="$timezone" date "+%H:%M:%S")
+    printf "%-20s %s\n" "$label:" "$time"
+}
+
+show_world_clock() {
+    echo "World Clock"
+    echo "==========="
+
+    format_time "Local" "$(
+        timedatectl show --property=Timezone --value 2>/dev/null || date +%Z
+    )"
+
+    if [[ -f "$TIMEZONES_CONFIG" ]]; then
+        while IFS=':' read -r label timezone; do
+            [[ "$label" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "$label" || -z "$timezone" ]] && continue
+
+            if timedatectl list-timezones | grep -qx "$timezone"; then
+                format_time "$label" "$timezone"
+            else
+                echo "Invalid timezone: $timezone" >&2
+            fi
+        done < "$TIMEZONES_CONFIG"
+    else
+        echo "No configured timezones found at $TIMEZONES_CONFIG"
+    fi
+}
+
+show_fzf_clock() {
+    selected_tz=$(timedatectl list-timezones | fzf --prompt="Select timezone: ")
+
+    if [[ -n "$selected_tz" ]]; then
+        echo "Selected Timezone"
+        echo "================="
+        format_time "Selected" "$selected_tz"
+    fi
+}
+
+show_help() {
+    echo "gclock - Minimal CLI World Clock"
+    echo
+    echo "Usage:"
+    echo "  gclock.sh           Show world clock with configured timezones"
+    echo "  gclock.sh --fzf     Select a timezone with fzf"
+    echo "  gclock.sh --help    Show this help message"
+    echo
+    echo "Configuration:"
+    echo "  Add your timezones to the config file: $TIMEZONES_CONFIG"
+}
+
+case "$1" in
+    ""|world) show_world_clock ;;
+    --fzf) show_fzf_clock ;;
+    --help|-h) show_help ;;
+    *) show_help ;;
+esac

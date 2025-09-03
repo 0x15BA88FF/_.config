@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+service_displaymanager() {
+    case "$1" in
+        start)   systemctl start lemurs.service ;;
+        stop)    systemctl stop lemurs.service ;;
+        enable)  systemctl enable lemurs.service ;;
+        disable) systemctl disable lemurs.service ;;
+        restart) systemctl restart lemurs.service ;;
+        status)  systemctl status --no-pager lemurs.service ;;
+    esac
+}

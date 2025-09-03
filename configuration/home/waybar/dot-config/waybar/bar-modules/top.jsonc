@@ -1,0 +1,17 @@
+{
+    "cpu": {
+        "interval": 1,
+        "format": "󰍛 {usage}%"
+    },
+    "disk": {
+        "interval": 60,
+        "format": "󰋊 {percentage_used}%",
+        "tooltip-format": "{specific_used:0.2f} GB/{specific_total:0.2f} GB",
+        "unit": "GB"
+    },
+    "memory": {
+        "format": " {percentage}%",
+        "tooltip-format": " {used:0.1f}GB/{total:0.1f}GB",
+        "interval": 1
+    }
+}

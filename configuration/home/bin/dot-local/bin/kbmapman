@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+get_layouts() {
+    localectl list-keymaps 2>/dev/null || echo -e "us\nde\nfr\nes\nit\nru"
+}
+
+notify_error() {
+    echo "$1" >&2
+    notify-send "Locale/Keyboard Error" "$1" 2>/dev/null || true
+}
+
+set_keyboard() {
+    local success=false
+
+    if [ -n "$WAYLAND_DISPLAY" ]; then
+        localectl set-keymap "$1" 2>/dev/null && success=true
+        [ "$success" = false ] && gsettings set org.gnome.desktop.input-sources sources "[('xkb', '$1')]" 2>/dev/null && success=true
+        [ "$success" = false ] && swaymsg input type:keyboard xkb_layout "$1" 2>/dev/null && success=true
+    elif [ -n "$DISPLAY" ]; then
+        setxkbmap "$1" 2>/dev/null && success=true
+    fi
+
+    if [ "$success" = false ]; then
+        notify_error "Failed to set keyboard layout '$1'"
+        return 1
+    else
+        echo "Switched keyboard layout to '$1'"
+    fi
+}
+
+case "$1" in
+    set) set_keyboard "$2" ;;
+    list) get_layouts ;;
+    *) echo "Usage: $0 {set [LAYOUT]|list}" && exit 1 ;;
+esac

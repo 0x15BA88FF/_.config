@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+get_locales() {
+    locale -a | grep -E '\.(utf8|UTF-8)$' | sort
+}
+
+notify_error() {
+    echo "$1" >&2
+    notify-send "Locale/Keyboard Error" "$1" 2>/dev/null || true
+}
+
+set_locale() {
+    if ! locale -a | grep -q "^$1$"; then
+        notify_error "Locale '$1' not available"
+        return 1
+    fi
+
+    export LANG="$1"
+    export LC_ALL="$1"
+    echo "Switched locale to $1"
+}
+
+case "$1" in
+    "set") set_locale "$2" ;;
+    "list") get_locales ;;
+    *) echo "Usage: $0 {set [LANG]|list}" && exit 1 ;;
+esac

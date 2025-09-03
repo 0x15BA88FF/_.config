@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if ! pgrep -x swaync > /dev/null; then
+    swaync &
+    sleep 0.2
+fi
+
+case "$1" in
+    "toggle") swaync-client -R -rs -t ;;
+esac

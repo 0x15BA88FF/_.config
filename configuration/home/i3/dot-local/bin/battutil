@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+TMPFILE="/tmp/battutil"
+SCAN_INTERVAL=10
+NOTIFY_INTERVAL=30
+
+LOW_ACTION="notify-send 'Battery Low' '$PERCENT%'"
+CRITICAL_ACTION="notify-send -u critical 'Battery Critical' '$PERCENT%'"
+FULL_ACTION="notify-send 'Battery Full' '$PERCENT%'"
+CHARGING_ACTION="notify-send 'Charging' '$PERCENT%'"
+
+get_battery() {
+    cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1 || echo "0"
+}
+
+get_status() {
+    cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -1 || echo "Unknown"
+}
+
+watch_battery() {
+    local last_notify=0
+
+    while true; do
+        PERCENT=$(get_battery)
+        STATUS=$(get_status)
+        PREV=$(cat "$TMPFILE" 2>/dev/null || echo "0")
+        NOW=$(date +%s)
+
+        echo "$PERCENT" > "$TMPFILE"
+
+        if [ $((NOW - last_notify)) -ge $NOTIFY_INTERVAL ]; then
+            if [ "$STATUS" = "Charging" ] && [ "$PERCENT" -eq 100 ]; then
+                eval "$FULL_ACTION"
+                last_notify=$NOW
+            elif [ "$STATUS" = "Charging" ] && [ "$PREV" -lt "$PERCENT" ]; then
+                eval "$CHARGING_ACTION"
+                last_notify=$NOW
+            elif [ "$STATUS" != "Charging" ] && [ "$PERCENT" -le 5 ]; then
+                eval "$CRITICAL_ACTION"
+                last_notify=$NOW
+            elif [ "$STATUS" != "Charging" ] && [ "$PERCENT" -le 15 ]; then
+                eval "$LOW_ACTION"
+                last_notify=$NOW
+            fi
+        fi
+
+        sleep $SCAN_INTERVAL
+    done
+}
+
+case "$1" in
+    watch) watch_battery ;;
+esac

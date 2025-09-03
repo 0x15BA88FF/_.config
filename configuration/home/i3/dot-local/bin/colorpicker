@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+case $1 in
+    hex | rgb | hsl | hsv | cmyk) hyprpicker -f "${1}" -a ;;
+esac
